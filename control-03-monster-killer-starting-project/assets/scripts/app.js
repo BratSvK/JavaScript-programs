@@ -38,41 +38,50 @@ function writeToLog(_event, _value, _monsterHealth, _playerHealth) {
     finalMonsterHealth: _monsterHealth,
     finalPlayerHealth: _playerHealth,
   };
-  if (_event === LOG_EVENT_PLAYER_ATTACK) {
-    // MORE DYNAMIC AND SHORTER
-    logEntry.target = "MONSTER";
-  } else if (_event === LOG_EVENT_PLAYER_STRONG_ATTACK) {
-    // EASIER TO READ
-    logEntry = {
-      event: _event,
-      value: _value,
-      target: "Monster",
-      finalMonsterHealth: _monsterHealth,
-      finalPlayerHealth: _playerHealth,
-    };
-  } else if (_event === LOG_EVENT_MONSTER_ATACK) {
-    logEntry = {
-      event: _event,
-      value: _value,
-      target: "Player",
-      finalMonsterHealth: _monsterHealth,
-      finalPlayerHealth: _playerHealth,
-    };
-  } else if (_event === LOG_EVENT_PLAYER_HEAL) {
-    logEntry = {
-      event: _event,
-      value: _value,
-      target: "Player",
-      finalMonsterHealth: _monsterHealth,
-      finalPlayerHealth: _playerHealth,
-    };
-  } else if (_event === LOG_EVENT_GAME_OVER) {
-    logEntry = {
-      event: _event,
-      value: _value,
-      finalMonsterHealth: _monsterHealth,
-      finalPlayerHealth: _playerHealth,
-    };
+
+  switch (_event) {
+    case LOG_EVENT_PLAYER_ATTACK:
+      logEntry.target = "MONSTER";
+      break; // jump out of switch
+    case LOG_EVENT_PLAYER_STRONG_ATTACK:
+      logEntry = {
+        event: _event,
+        value: _value,
+        target: "Monster",
+        finalMonsterHealth: _monsterHealth,
+        finalPlayerHealth: _playerHealth,
+      };
+      break;
+    case LOG_EVENT_MONSTER_ATACK:
+      logEntry = {
+        event: _event,
+        value: _value,
+        target: "Player",
+        finalMonsterHealth: _monsterHealth,
+        finalPlayerHealth: _playerHealth,
+      };
+      break;
+
+    case LOG_EVENT_PLAYER_HEAL:
+      logEntry = {
+        event: _event,
+        value: _value,
+        target: "Player",
+        finalMonsterHealth: _monsterHealth,
+        finalPlayerHealth: _playerHealth,
+      };
+      break;
+    case LOG_EVENT_GAME_OVER:
+      logEntry = {
+        event: _event,
+        value: _value,
+        finalMonsterHealth: _monsterHealth,
+        finalPlayerHealth: _playerHealth,
+      };
+      break;
+
+    default:
+      break;
   }
   battleLog.push(logEntry);
 }
@@ -121,16 +130,18 @@ function attackHandler() {
 }
 // utok na montrtrum v akom mode bude
 function attackMonster(mode) {
-  let maxDamage;
-  let logEvent;
+  const maxDamage = mode === MODE_ATTACK ? ATTACK_VALUE : STRONG_ATTACK_VALUE; // ternary operator
+  const logEvent = mode === MODE_ATTACK ? LOG_EVENT_PLAYER_ATTACK : LOG_EVENT_PLAYER_STRONG_ATTACK;
   // mame len dva mody takze moze byt aj else
-  if (mode === MODE_ATTACK) {
-    maxDamage = ATTACK_VALUE;
-    logEvent = LOG_EVENT_PLAYER_ATTACK;
-  } else if (mode === MODE_STRONG_ATTACK) {
-    maxDamage = STRONG_ATTACK_VALUE;
-    logEvent = LOG_EVENT_PLAYER_STRONG_ATTACK;
-  }
+  // if (mode === MODE_ATTACK) {
+  //   maxDamage = ATTACK_VALUE;
+  //   logEvent = LOG_EVENT_PLAYER_ATTACK;
+  // } else if (mode === MODE_STRONG_ATTACK) {
+  //   maxDamage = STRONG_ATTACK_VALUE;
+  //   logEvent = LOG_EVENT_PLAYER_STRONG_ATTACK;
+  // }
+  // using ternary operator instead
+
   const damageFromPlayer = dealMonsterDamage(maxDamage);
   currentMonsterHealth -= damageFromPlayer;
   writeToLog(logEvent, damageFromPlayer, currentMonsterHealth, currentPlayerHealth);
@@ -156,6 +167,14 @@ function healPlayerHandler() {
   endRound();
 }
 function printLogHandler() {
+  for (let index = 0; index < battleLog.length; index++) {
+    console.log("---------------------------------");
+  }
+
+  for (let i = 0; i < battleLog.length; i++) {
+    console.log(battleLog[i]);
+  }
+
   console.log(battleLog);
 }
 
