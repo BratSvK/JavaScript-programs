@@ -15,12 +15,22 @@ const LOG_EVENT_MONSTER_ATACK = "MONSTER_ATTACK";
 const LOG_EVENT_PLAYER_HEAL = "PLAYER_HEAL";
 const LOG_EVENT_GAME_OVER = "GAME_OVER";
 
-const enteredValue = parseInt(prompt("Maximum life for you and the monster", "100"));
+function getMaxLifeValues() {
+  const enteredValue = prompt("Maximum life for you and the monster", "100");
 
-let chosenMaxlife = enteredValue;
+  const parsedValue = parseInt(enteredValue);
 
-//ak input nieje number tak nastav deafault value
-if (isNaN(chosenMaxlife) || chosenMaxlife <= 0) {
+  //ak input nieje number tak nastav deafault value
+  if (isNaN(parsedValue) || parsedValue <= 0) {
+    throw { message: "Input isnt a number" };
+  }
+  return parsedValue;
+}
+let chosenMaxlife;
+try {
+  chosenMaxlife = getMaxLifeValues();
+} catch (error) {
+  console.log(error);
   chosenMaxlife = 100;
 }
 
@@ -28,6 +38,7 @@ let currentMonsterHealth = chosenMaxlife;
 let currentPlayerHealth = chosenMaxlife;
 let hasBonusLife = true;
 let battleLog = [];
+let lastLoggedEntry;
 
 adjustHealthBars(chosenMaxlife);
 
@@ -171,8 +182,17 @@ function printLogHandler() {
     console.log("---------------------------------");
   }
 
-  for (let i = 0; i < battleLog.length; i++) {
-    console.log(battleLog[i]);
+  let counter = 0;
+  for (const logEntry of battleLog) {
+    if ((!lastLoggedEntry && lastLoggedEntry !== 0) || lastLoggedEntry === counter) {
+      console.log(`#${counter}`);
+      for (const key in logEntry) {
+        console.log(`${key} => ${logEntry[key]}`);
+      }
+      lastLoggedEntry = counter;
+      break;
+    }
+    counter++;
   }
 
   console.log(battleLog);
