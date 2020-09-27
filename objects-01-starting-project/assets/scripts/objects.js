@@ -18,12 +18,15 @@ const renderMovies = (filter = "") => {
 
   filteredMovies.forEach((movie) => {
     const movieElement = document.createElement("li");
-    let text = movie.info.title + "-";
+    const { info } = movie;
+    // let text = info.title + "-";1
+    // const { getFormmattedTitle } = movie;
+    let text = movie.getFormmattedTitle() + " - ";
 
     //for in for keys in objects
-    for (const key in movie.info) {
-      if (key !== "title") {
-        text += `${key}: ${movie.info[key]} `;
+    for (const key in info) {
+      if (key !== "title" && key !== "_title") {
+        text += `${key}: ${info[key]} `;
       }
     }
 
@@ -43,11 +46,29 @@ const addMoiveHandler = () => {
   }
   const newMovie = {
     info: {
-      title,
+      set title(val) {
+        if (val.trim() === "") {
+          this._title = "DEFAULT";
+          return;
+        }
+        this._title = val;
+      },
+
+      get title() {
+        return this._title;
+      },
       [extraName]: extraValue,
     },
     id: Math.random(),
+    getFormmattedTitle() {
+      return this.info.title.toUpperCase();
+    },
   };
+
+  newMovie.info.title = title;
+  console.log("addMoiveHandler -> newMovie", newMovie.info.title);
+  
+
 
   movies.push(newMovie);
   renderMovies();
