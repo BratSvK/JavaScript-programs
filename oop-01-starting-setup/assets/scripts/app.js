@@ -21,9 +21,13 @@ class ElementAttributes {
 
 class Component {
   // kde to chceme vykreslit
-  constructor(renderHookId) {
+  constructor(renderHookId, shouldRender = true) {
     this.hookId = renderHookId;
+    if(shouldRender)
+    this.render();
   }
+
+  render() {}
 
   // vytvorenie sablony elementu
   createRootElement(tag, cssClasses, atributes) {
@@ -56,8 +60,12 @@ class ShoppingCart extends Component {
   }
 
   constructor(renderHookId) {
-    super(renderHookId);
-
+    super(renderHookId, false);
+    this.orderProducts = () => {
+      console.log("Ordering...");
+      console.log(this.items);
+    }
+    this.render();
   }
 
   addProduct(product) {
@@ -66,6 +74,8 @@ class ShoppingCart extends Component {
     this.cartItems = updatedItems;
   }
 
+  
+
   render() {
     const cartEl = this.createRootElement("section", "cart");
     cartEl.innerHTML = `
@@ -73,14 +83,17 @@ class ShoppingCart extends Component {
     <button>Order Now!</button>
     `;
 
+    const orderButton = document.querySelector("button");
+    orderButton.addEventListener("click", this.orderProducts);
     this.totalOutput = cartEl.querySelector("h2");
   }
 }
 
 class ProductItem extends Component {
-  constructor(product,renderHookId) {
-    super(renderHookId);
+  constructor(product, renderHookId) {
+    super(renderHookId,false);
     this.product = product;
+    this.render();
   }
 
   // add to cart
@@ -88,6 +101,7 @@ class ProductItem extends Component {
     // vylepsenie
     App.addProductToCart(this.product);
   }
+
 
   render() {
     const prodEl = this.createRootElement("li", "product-item");
@@ -110,44 +124,58 @@ class ProductItem extends Component {
 }
 
 class ProductList extends Component {
-  products = [
-    new Product(
-      "A pillow",
-      "https://media.istockphoto.com/photos/pillow-isolated-on-white-background-picture-id899226398?k=6&m=899226398&s=612x612&w=0&h=JtsWJqDPEQGmJnqWCkgUcHGHhCmjId1OkELo-uVeY-o=",
-      "A soft pillow!",
-      19.99
-    ),
-    new Product(
-      "A Carpet",
-      "https://karabagh.lu/wp-content/uploads/2016/05/carpets-8.jpg",
-      "A carpet which you might like - or not.",
-      89.99
-    ),
-  ];
+  #products = [];
 
   constructor(renderHookId) {
-    super(renderHookId);
+    super(renderHookId, false);
+    this.render();
+    this.fetchProcucts();
+    
+  }
+
+  fetchProcucts() {
+    this.#products = [
+      new Product(
+        "A pillow",
+        "https://media.istockphoto.com/photos/pillow-isolated-on-white-background-picture-id899226398?k=6&m=899226398&s=612x612&w=0&h=JtsWJqDPEQGmJnqWCkgUcHGHhCmjId1OkELo-uVeY-o=",
+        "A soft pillow!",
+        19.99
+      ),
+      new Product(
+        "A Carpet",
+        "https://karabagh.lu/wp-content/uploads/2016/05/carpets-8.jpg",
+        "A carpet which you might like - or not.",
+        89.99
+      ),
+    ];
+    this.renderProducts();
+  }
+
+  renderProducts() {
+    for (const product of this.#products) {
+      new ProductItem(product, "prod-list");
+    }
+
   }
 
   render() {
-    const rootEl = this.createRootElement("ul","product-list", [new ElementAttributes("id","prod-list")]);
-      const attributeId =   rootEl.getAttribute("id");
+    this.createRootElement("ul", "product-list", [new ElementAttributes("id", "prod-list")]);
     // render a single product
-    for (const product of this.products) {
-      const productItem = new ProductItem(product, attributeId);
-      productItem.render();
+    if (this.#products && this.#products.length > 0) {
+      this.renderProducts();
     }
   }
 }
 
-class Shop {
+class Shop extends Component {
+  constructor() {
+    super();
+  }
   // combine product and cartList
   render() {
     // kde to chceme zobrazit
     this.cart = new ShoppingCart("app");
-    this.cart.render();
-    const productList = new ProductList("app");
-    productList.render();
+    new ProductList("app");
   }
 }
 
@@ -157,7 +185,6 @@ class App {
 
   static init() {
     const shop = new Shop();
-    shop.render();
     this.cart = shop.cart;
   }
 
@@ -168,4 +195,3 @@ class App {
 }
 
 App.init();
-console.log(App.cart.items);
